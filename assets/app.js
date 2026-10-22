@@ -122,8 +122,8 @@
     var next = all.filter(function (x) { return !done[x.lesson.id]; })[0];
 
     var html = '<section class="hero wrap">' +
-      "<h1>ისწავლე პადელი <em>ქართულად</em></h1>" +
-      '<p class="lead">ვიდეო-გაკვეთილები სრული დამწყებიდან Advanced-მდე. პირველი კურსი უფასოა.</p>' +
+      "<h1>ისწავლე პადელი <em>ონლაინ</em></h1>" +
+      '<p class="lead">ვიდეო-გაკვეთილები ქართულად, სრული დამწყებიდან Advanced-მდე. ისწავლე შენი ტემპით, პირველი კურსი უფასოა.</p>' +
       (next ? '<a class="btn primary" href="#l-' + next.lesson.id + '">' + (doneN ? "გაგრძელება" : "დაიწყე უფასოდ") + "</a>" : "") +
       "</section>";
 
@@ -253,7 +253,7 @@
 
   document.getElementById("brandName").textContent = S.name;
   document.getElementById("footName").textContent = S.name;
-  document.getElementById("footTag").textContent = S.contact || "";
+  document.getElementById("footTag").textContent = S.contact ? "კონტაქტი: " + S.contact : "";
   window.addEventListener("hashchange", function () { render(); });
   render();
 })();
