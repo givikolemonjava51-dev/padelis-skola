@@ -85,7 +85,7 @@
     if (!url) {
       return '<div class="player placeholder" role="img" aria-label="ვიდეო მალე დაემატება">' +
         courtSvg("ph-court") +
-        '<div class="ph-text"><span class="ph-dot"></span><strong>ვიდეო მალე დაემატება</strong></div></div>';
+        '<div class="ph-text"><span class="play"></span><span class="soon">ვიდეო მალე დაემატება</span></div></div>';
     }
     var yt = youtubeId(url), vm = vimeoId(url), embed = null;
     if (yt) embed = "https://www.youtube-nocookie.com/embed/" + yt + "?rel=0";
@@ -125,8 +125,11 @@
     { id: "side", x: 40, y: 95, name: "გვერდითი კედელი", text: "ნაწილი შუშაა, ნაწილი ლითონის ბადე. შუშიდან ბურთი თანაბრად აისხლიტება, ლითონის ბადიდან კი არაპროგნოზირებადად.", lesson: "w01" }
   ];
 
+  function dash() { return '<div class="dash" aria-hidden="true"></div>'; }
+
   function courtExplorer() {
-    var html = '<section class="wrap explore reveal" id="court"><h2>გაიცანი კორტი</h2>' +
+    var html = '<section class="band band-light" id="court"><div class="wrap explore reveal">' + dash() +
+      '<p class="eyebrow">ნაბიჯი 2 · ინტერაქტიული</p><h2>გაიცანი კორტი</h2>' +
       '<p class="lead">დააჭირე კორტის მონიშნულ ნაწილს და გაიგე, რას ნიშნავს.</p>' +
       '<div class="explore-court"><svg viewBox="-6 -6 212 112" aria-hidden="true">' +
       '<rect x="0" y="0" width="200" height="100" rx="2" class="c-turf"/>' +
@@ -147,7 +150,7 @@
     COURT_SPOTS.forEach(function (p) {
       html += '<button class="chip" type="button" role="tab" data-spot="' + p.id + '">' + esc(p.name) + "</button>";
     });
-    return html + '</div><div class="spot-info" id="spotInfo" aria-live="polite"></div></section>';
+    return html + '</div><div class="spot-info" id="spotInfo" aria-live="polite"></div></div></section>';
   }
 
   function selectSpot(id) {
@@ -166,6 +169,26 @@
     box.classList.remove("swap"); void box.offsetWidth; box.classList.add("swap");
     box.innerHTML = "<strong>" + esc(p.name) + "</strong><p>" + esc(p.text) + "</p>" +
       (hit ? '<a href="#l-' + hit.lesson.id + '">გაკვეთილი: ' + esc(hit.lesson.title) + " →</a>" : "");
+  }
+
+  // ბარათების ილუსტრაციები (160 × 70). თეთრი ხაზები, ყვითელი ბურთი.
+  var ART = {
+    intro: '<g class="a-line"><ellipse cx="62" cy="30" rx="15" ry="18"/><path d="M62 48 L62 62"/><circle cx="56" cy="24" r="1.4"/><circle cx="62" cy="22" r="1.4"/><circle cx="68" cy="24" r="1.4"/><circle cx="58" cy="31" r="1.4"/><circle cx="66" cy="31" r="1.4"/><circle cx="62" cy="38" r="1.4"/></g>' +
+      '<circle class="a-ball" cx="100" cy="40" r="7"/><path class="a-seam" d="M95 35 Q100 40 95 45 M105 35 Q100 40 105 45"/>',
+    basics: '<path class="a-dash" d="M28 56 Q70 4 128 30"/><g class="a-line" transform="rotate(-35 40 46)"><ellipse cx="40" cy="34" rx="10" ry="12"/><path d="M40 46 L40 58"/></g>' +
+      '<circle class="a-ball" cx="128" cy="30" r="6"/><path class="a-line" d="M8 62 H152"/>',
+    walls: '<path class="a-line" d="M110 6 V62 H20"/><path class="a-line thin" d="M118 14 V62 M126 22 V62"/>' +
+      '<path class="a-dash" d="M24 50 L80 58 L108 20 L64 30"/><circle class="a-ball" cx="64" cy="30" r="6"/>',
+    attack: '<path class="a-line" d="M10 60 H150"/><path class="a-line" d="M80 34 V60"/><path class="a-line thin" d="M80 38 H150 M80 46 H150" />' +
+      '<circle class="a-ball" cx="40" cy="14" r="6"/><path class="a-dash" d="M44 18 L118 56"/><path class="a-line" d="M110 50 L118 56 L108 58"/>',
+    advanced: '<rect class="a-line" x="20" y="8" width="120" height="54" rx="2"/><path class="a-line thin" d="M80 8 V62 M40 8 V62 M120 8 V62 M40 35 H120"/>' +
+      '<path class="a-dash" d="M30 52 L70 20 L108 48"/><circle class="a-ball" cx="108" cy="48" r="5"/><circle class="a-spot" cx="30" cy="52" r="3"/><circle class="a-spot" cx="70" cy="20" r="3"/>',
+    drills: '<path class="a-line" d="M126 6 V62"/><path class="a-line" d="M10 62 H150"/>' +
+      '<circle class="a-ball f1" cx="40" cy="48" r="5"/><circle class="a-ball f2" cx="70" cy="34" r="5"/><circle class="a-ball f3" cx="100" cy="22" r="5"/>' +
+      '<path class="a-dash" d="M40 48 L118 18"/>'
+  };
+  function courseArt(c) {
+    return '<span class="course-art" aria-hidden="true"><svg viewBox="0 0 160 70">' + (ART[c.id] || ART.intro) + "</svg></span>";
   }
 
   function viewHome() {
@@ -189,22 +212,27 @@
       (next ? '<a class="btn primary" href="#l-' + next.lesson.id + '">' + (doneN ? "გაგრძელება" : "დაიწყე უფასოდ") + "</a>" : "") +
       '<a class="btn on-dark" href="#quiz">გაიგე შენი დონე</a></div></div></section>';
 
-    html += '<div class="court-divider" aria-hidden="true"><svg viewBox="0 0 400 20" preserveAspectRatio="none"><line x1="0" y1="10" x2="400" y2="10" class="reveal draw-line"/></svg></div>';
-
-    html += '<section class="wrap" id="courses"><h2 class="reveal">კურსები</h2><ol class="courses">';
+    html += '<section class="band band-dark" id="courses"><div class="wrap">' + dash() +
+      '<p class="eyebrow reveal">ნაბიჯი 1 · აირჩიე დონე</p><h2 class="reveal">კურსები</h2><ol class="courses">';
     S.courses.forEach(function (c) {
       var st = courseStats(c);
       var allFree = c.lessons.every(function (l) { return l.free; });
-      html += '<li class="reveal"><a class="course" href="#c-' + c.id + '">' +
-        '<span class="lvl' + (c.level ? "" : " side") + '">' + (c.level ? c.level : "+") + "</span>" +
+      html += '<li class="reveal"><a class="course lv-' + (c.level || 0) + '" href="#c-' + c.id + '">' +
+        courseArt(c) + (allFree ? '<span class="badge-free">უფასო</span>' : "") +
+        '<span class="course-row"><span class="lvl">' + (c.level ? c.level : "+") + "</span>" +
         '<span class="course-body"><span class="course-level">' + esc(c.levelName) + "</span>" +
         "<strong>" + esc(c.title) + "</strong>" +
-        '<span class="course-meta">' + lessonWord(st.total) + (allFree ? ' · <b class="free-word">უფასო</b>' : "") +
+        '<span class="course-meta">' + lessonWord(st.total) +
         (st.done ? " · გავლილია " + st.pct + "%" : "") + "</span></span>" +
-        '<span class="course-go" aria-hidden="true">→</span></a></li>';
+        '<span class="course-go" aria-hidden="true">→</span></span></a></li>';
     });
-    html += "</ol></section>";
-    return html + courtExplorer();
+    html += "</ol></div></section>";
+    html += courtExplorer();
+    html += '<section class="band band-mid"><div class="wrap quiz-cta">' + dash() +
+      '<p class="eyebrow reveal">ნაბიჯი 3 · ტესტი</p><h2 class="reveal">არ იცი, საიდან დაიწყო?</h2>' +
+      '<p class="lead reveal">უპასუხე 3 კითხვას და გეტყვით, რომელი კურსი გიხდება.</p>' +
+      '<a class="btn primary reveal" href="#quiz">გაიგე შენი დონე</a></div></section>';
+    return html;
   }
 
   // ---------- დონის ტესტი ----------
