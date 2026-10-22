@@ -116,29 +116,123 @@
   }
 
   // ---------- გვერდები ----------
+  // კორტის ნაწილები ინტერაქტიული სექციისთვის (კოორდინატები 200 × 100 კორტზე, ბადე შუაშია)
+  var COURT_SPOTS = [
+    { id: "net", x: 100, y: 50, name: "ბადე", text: "ბადე კორტს ორ 10 × 10 მეტრიან ნაწილად ყოფს. სიმაღლე ცენტრში 88 სმ-ია, კიდეებთან 92 სმ.", lesson: "i02" },
+    { id: "serve", x: 65.25, y: 25, name: "მოწოდების ხაზი", text: "ბადიდან 6,95 მეტრზეა. მოწოდება სრულდება ამ ხაზის უკნიდან, წელის ქვემოთ და დიაგონალზე.", lesson: "b03" },
+    { id: "center", x: 135, y: 50, name: "ცენტრალური ხაზი", text: "მოწოდების ზონას მარჯვენა და მარცხენა ნაწილებად ყოფს. მოწოდება ყოველთვის მეტოქის დიაგონალურ ზონაში უნდა მოხვდეს.", lesson: "i09" },
+    { id: "back", x: 192, y: 72, name: "უკანა მინა", text: "3 მეტრი სიმაღლის შუშის კედელი. ბურთი შეგიძლია დააბრუნო მას შემდეგ, რაც მიწაზე დაეცემა და მინიდან აისხლიტება.", lesson: "b08" },
+    { id: "side", x: 40, y: 95, name: "გვერდითი კედელი", text: "ნაწილი შუშაა, ნაწილი ლითონის ბადე. შუშიდან ბურთი თანაბრად აისხლიტება, ლითონის ბადიდან კი არაპროგნოზირებადად.", lesson: "w01" }
+  ];
+
+  function courtExplorer() {
+    var html = '<section class="wrap explore reveal" id="court"><h2>გაიცანი კორტი</h2>' +
+      '<p class="lead">დააჭირე კორტის მონიშნულ ნაწილს და გაიგე, რას ნიშნავს.</p>' +
+      '<div class="explore-court"><svg viewBox="-6 -6 212 112" aria-hidden="true">' +
+      '<rect x="0" y="0" width="200" height="100" rx="2" class="c-turf"/>' +
+      '<rect x="0" y="0" width="200" height="100" rx="2" class="c-glass"/>' +
+      '<rect x="2" y="2" width="196" height="96" class="c-line draw" pathLength="1" fill="none"/>' +
+      '<line x1="30.5" y1="2" x2="30.5" y2="98" class="c-line draw" pathLength="1"/><line x1="169.5" y1="2" x2="169.5" y2="98" class="c-line draw" pathLength="1"/>' +
+      '<line x1="30.5" y1="50" x2="169.5" y2="50" class="c-line draw" pathLength="1"/>' +
+      '<line x1="100" y1="-3" x2="100" y2="103" class="c-net hl" data-part="net"/>' +
+      '<line x1="30.5" y1="2" x2="30.5" y2="98" class="hl" data-part="serve"/><line x1="169.5" y1="2" x2="169.5" y2="98" class="hl" data-part="serve"/>' +
+      '<line x1="30.5" y1="50" x2="169.5" y2="50" class="hl" data-part="center"/>' +
+      '<line x1="200" y1="0" x2="200" y2="100" class="hl" data-part="back"/><line x1="0" y1="0" x2="0" y2="100" class="hl" data-part="back"/>' +
+      '<line x1="0" y1="100" x2="200" y2="100" class="hl" data-part="side"/><line x1="0" y1="0" x2="200" y2="0" class="hl" data-part="side"/>' +
+      "</svg>";
+    COURT_SPOTS.forEach(function (p) {
+      html += '<button class="spot" type="button" data-spot="' + p.id + '" style="left:' + ((p.x + 6) / 212 * 100) + "%;top:" + ((p.y + 6) / 112 * 100) + '%" aria-label="' + esc(p.name) + '"><span>+</span></button>';
+    });
+    html += '</div><div class="chips" role="tablist">';
+    COURT_SPOTS.forEach(function (p) {
+      html += '<button class="chip" type="button" role="tab" data-spot="' + p.id + '">' + esc(p.name) + "</button>";
+    });
+    return html + '</div><div class="spot-info" id="spotInfo" aria-live="polite"></div></section>';
+  }
+
+  function selectSpot(id) {
+    var p = COURT_SPOTS.filter(function (x) { return x.id === id; })[0];
+    if (!p) return;
+    document.querySelectorAll("[data-spot]").forEach(function (el) {
+      var on = el.getAttribute("data-spot") === id;
+      el.classList.toggle("on", on);
+      if (el.classList.contains("chip")) el.setAttribute("aria-selected", on ? "true" : "false");
+    });
+    document.querySelectorAll(".explore-court .hl").forEach(function (el) {
+      el.classList.toggle("on", el.getAttribute("data-part") === id);
+    });
+    var hit = findLesson(p.lesson);
+    var box = document.getElementById("spotInfo");
+    box.classList.remove("swap"); void box.offsetWidth; box.classList.add("swap");
+    box.innerHTML = "<strong>" + esc(p.name) + "</strong><p>" + esc(p.text) + "</p>" +
+      (hit ? '<a href="#l-' + hit.lesson.id + '">გაკვეთილი: ' + esc(hit.lesson.title) + " →</a>" : "");
+  }
+
   function viewHome() {
     var all = allLessons();
     var doneN = all.filter(function (x) { return done[x.lesson.id]; }).length;
     var next = all.filter(function (x) { return !done[x.lesson.id]; })[0];
+    var words = ["ისწავლე", "პადელი", "ონლაინ"];
 
-    var html = '<section class="hero wrap">' +
-      "<h1>ისწავლე პადელი <em>ონლაინ</em></h1>" +
+    var html = '<section class="hero">' +
+      (S.heroVideo ? '<video class="hero-video" src="' + esc(S.heroVideo) + '" autoplay muted loop playsinline preload="metadata" aria-hidden="true"></video>' : "") +
+      '<svg class="hero-court" viewBox="0 0 200 100" preserveAspectRatio="xMidYMid slice" aria-hidden="true">' +
+      '<rect x="2" y="2" width="196" height="96" class="h-line" pathLength="1"/><line x1="100" y1="0" x2="100" y2="100" class="h-line net"/>' +
+      '<line x1="30.5" y1="2" x2="30.5" y2="98" class="h-line" pathLength="1"/><line x1="169.5" y1="2" x2="169.5" y2="98" class="h-line" pathLength="1"/>' +
+      '<line x1="30.5" y1="50" x2="169.5" y2="50" class="h-line" pathLength="1"/>' +
+      '<g class="h-ball"><ellipse class="h-shadow" cx="0" cy="0" rx="3" ry="1.2"/><circle class="h-dot" cx="0" cy="0" r="2.6"/></g></svg>' +
+      '<div class="wrap hero-inner"><h1 class="words">' + words.map(function (w, i) {
+        return '<span style="--i:' + i + '">' + esc(w) + "</span>";
+      }).join(" ") + "</h1>" +
       '<p class="lead">ვიდეო-გაკვეთილები ქართულად, სრული დამწყებიდან Advanced-მდე. ისწავლე შენი ტემპით, პირველი კურსი უფასოა.</p>' +
+      '<div class="cta-row">' +
       (next ? '<a class="btn primary" href="#l-' + next.lesson.id + '">' + (doneN ? "გაგრძელება" : "დაიწყე უფასოდ") + "</a>" : "") +
-      "</section>";
+      '<a class="btn on-dark" href="#quiz">გაიგე შენი დონე</a></div></div></section>';
 
-    html += '<section class="wrap" id="courses"><h2>კურსები</h2><ol class="courses">';
+    html += '<div class="court-divider" aria-hidden="true"><svg viewBox="0 0 400 20" preserveAspectRatio="none"><line x1="0" y1="10" x2="400" y2="10" class="reveal draw-line"/></svg></div>';
+
+    html += '<section class="wrap" id="courses"><h2 class="reveal">კურსები</h2><ol class="courses">';
     S.courses.forEach(function (c) {
       var st = courseStats(c);
       var allFree = c.lessons.every(function (l) { return l.free; });
-      html += '<li><a class="course" href="#c-' + c.id + '">' +
+      html += '<li class="reveal"><a class="course" href="#c-' + c.id + '">' +
         '<span class="lvl' + (c.level ? "" : " side") + '">' + (c.level ? c.level : "+") + "</span>" +
         '<span class="course-body"><span class="course-level">' + esc(c.levelName) + "</span>" +
         "<strong>" + esc(c.title) + "</strong>" +
         '<span class="course-meta">' + lessonWord(st.total) + (allFree ? ' · <b class="free-word">უფასო</b>' : "") +
-        (st.done ? " · გავლილია " + st.pct + "%" : "") + "</span></span></a></li>";
+        (st.done ? " · გავლილია " + st.pct + "%" : "") + "</span></span>" +
+        '<span class="course-go" aria-hidden="true">→</span></a></li>';
     });
-    return html + "</ol></section>";
+    html += "</ol></section>";
+    return html + courtExplorer();
+  }
+
+  // ---------- დონის ტესტი ----------
+  var QUIZ = [
+    { q: "რამდენ ხანია, რაც პადელს თამაშობ?", a: ["ჯერ არასდროს მითამაშია", "6 თვემდე", "6 თვიდან 2 წლამდე", "2 წელზე მეტი"] },
+    { q: "უკანა კედლიდან აისხლიტებულ ბურთს როგორ აბრუნებ?", a: ["ჯერ ვერ ვაბრუნებ", "ზოგჯერ გამომდის", "ჩვეულებრივ ვაბრუნებ", "ადვილად და შეტევით"] },
+    { q: "ბანდეხა და ვიბორა?", a: ["არ ვიცი, რა არის", "ვიცი, მაგრამ ვერ ვასრულებ", "ბანდეხა გამომდის", "ორივე გამომდის, x3 სმეშიც"] }
+  ];
+  var quizState = { step: 0, score: 0 };
+
+  function viewQuiz() {
+    var html = '<section class="wrap narrow page-head quiz"><a class="back" href="#">← მთავარი</a>';
+    if (quizState.step < QUIZ.length) {
+      var item = QUIZ[quizState.step];
+      html += '<p class="course-level">კითხვა ' + (quizState.step + 1) + " / " + QUIZ.length + "</p>" +
+        '<div class="quiz-bar"><span style="width:' + (quizState.step / QUIZ.length * 100) + '%"></span></div>' +
+        '<h1 class="swap">' + esc(item.q) + '</h1><div class="answers">' +
+        item.a.map(function (t, i) { return '<button class="answer" type="button" data-score="' + i + '">' + esc(t) + "</button>"; }).join("") +
+        "</div>";
+    } else {
+      var lvl = Math.min(5, Math.floor(quizState.score / 2) + 1);
+      var c = S.courses.filter(function (x) { return x.level === lvl; })[0] || S.courses[0];
+      html += '<p class="course-level">შენი დონე</p><h1 class="swap">' + esc(c.levelName) + "</h1>" +
+        '<p class="lead">გირჩევ, დაიწყო კურსით „' + esc(c.title) + "“.</p>" +
+        '<div class="cta-row"><a class="btn primary" href="#c-' + c.id + '">კურსზე გადასვლა</a>' +
+        '<button id="quizAgain" class="btn ghost" type="button">თავიდან</button></div>';
+    }
+    return html + "</section>";
   }
 
   function viewCourse(c) {
@@ -168,7 +262,7 @@
     var isDone = !!done[l.id];
     var html = '<section class="wrap narrow lesson">' +
       '<a class="back" href="#c-' + c.id + '">← ' + esc(c.title) + "</a>" +
-      videoHtml(l) +
+      '<div class="player-wrap">' + videoHtml(l) + '<span class="wipe" aria-hidden="true"></span></div>' +
       '<p class="course-level">გაკვეთილი ' + (i + 1) + " / " + c.lessons.length + "</p>" +
       "<h1>" + esc(l.title) + "</h1><p class=\"lead\">" + esc(l.summary) + "</p>" +
       '<ul class="points">' + l.points.map(function (p) { return "<li>" + esc(p) + "</li>"; }).join("") + "</ul>" +
@@ -223,6 +317,9 @@
       var c = findCourse(h.slice(2));
       html = viewCourse(c);
       document.title = c.title + " · " + S.name;
+    } else if (h === "quiz") {
+      html = viewQuiz();
+      document.title = "დონის ტესტი · " + S.name;
     } else if (h === "subscribe") {
       html = viewSubscribe();
       document.title = "გამოწერა · " + S.name;
@@ -238,6 +335,21 @@
     document.querySelectorAll(".nav a").forEach(function (a) {
       a.classList.toggle("active", a.getAttribute("href") === "#" + h || (h.indexOf("c-") === 0 || h.indexOf("l-") === 0) && a.getAttribute("href") === "#courses");
     });
+    document.querySelectorAll("[data-spot]").forEach(function (el) {
+      el.addEventListener("click", function () { selectSpot(el.getAttribute("data-spot")); });
+    });
+    if (document.getElementById("spotInfo")) selectSpot("net");
+    document.querySelectorAll(".answer").forEach(function (b) {
+      b.addEventListener("click", function () {
+        quizState.score += +b.getAttribute("data-score");
+        quizState.step++;
+        render(true);
+      });
+    });
+    var qa = document.getElementById("quizAgain");
+    if (qa) qa.addEventListener("click", function () { quizState = { step: 0, score: 0 }; render(true); });
+    if (h !== "quiz" && quizState.step >= QUIZ.length) quizState = { step: 0, score: 0 };
+    if (window.Motion) window.Motion.afterRender(app);
     var ds = document.getElementById("demoSub");
     if (ds) ds.addEventListener("click", function () { setSubscribed(!isSubscribed()); render(true); });
     var t = document.getElementById("toggleDone");
@@ -255,5 +367,7 @@
   document.getElementById("footName").textContent = S.name;
   document.getElementById("footTag").textContent = S.contact ? "კონტაქტი: " + S.contact : "";
   window.addEventListener("hashchange", function () { render(); });
+  var mt = document.getElementById("motionToggle");
+  if (mt && window.Motion) mt.addEventListener("click", function () { window.Motion.toggle(); render(true); });
   render();
 })();
