@@ -6,6 +6,12 @@
 <title>პადელის სკოლა</title>
 <meta name="description" content="ქართულენოვანი ონლაინ პადელის სკოლა: ვიდეო-გაკვეთილები სრული დამწყებიდან Advanced დონემდე.">
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="პადელის სკოლა">
 <meta property="og:title" content="პადელის სკოლა — ისწავლე პადელი ონლაინ">
 <meta property="og:description" content="ვიდეო-გაკვეთილები ქართულად, სრული დამწყებიდან Advanced-მდე. პირველი კურსი უფასოა.">
 <meta property="og:image" content="https://padelis-skola-unme.vercel.app/assets/og.png">
@@ -29,7 +35,8 @@
 </header>
 <main id="app"></main>
 <footer>
-  <div class="wrap"><strong id="footName"></strong><a href="#glossary">ლექსიკონი</a><a href="#quiz">დონის ტესტი</a><span id="footTag"></span><button id="motionToggle" class="linkbtn" type="button">მოძრაობის შემცირება</button></div>
+  <div class="wrap"><strong id="footName"></strong><a href="#glossary">ლექსიკონი</a><a href="#quiz">დონის ტესტი</a><a href="#guide">დამწყების გზამკვლევი</a><a href="#journal">დღიური</a><span id="footTag"></span><button id="motionToggle" class="linkbtn" type="button">მოძრაობის შემცირება</button><button id="installApp" class="linkbtn" type="button" hidden>დააყენე ტელეფონზე</button>
+    <p id="installHint" class="install-hint" hidden>iPhone-ზე: Safari-ში დააჭირე „გაზიარება“ ღილაკს და აირჩიე „მთავარ ეკრანზე დამატება“.</p></div>
 </footer>
 <a class="sticky-cta" href="#c-intro">დაიწყე სწავლა უფასოდ</a>
 <script src="assets/motion.js"></script>
